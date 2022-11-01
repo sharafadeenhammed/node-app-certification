@@ -1,29 +1,27 @@
 const Bootcamp = require("../models/Bootcamp.js")
 const asyncHandeler = require("../middleware/async.js")
 const geocoder = require("../utils/geocoder.js");
-// const { json, query } = require("express");
-
+// 0810 097 2092
 //@desc     get all botcamps
 //@route    GET /api/v1/bootcamps
 //@access   Public
 exports.getBootcamps = asyncHandeler(async function(req,res,next){
     // making a copy of req.query
     const reqQuery = {...req.query};
-
     //fields to exclude for filtering
     const removeFields = ["select","sort","limit","page"];
 
     //loop over removeFields and delete from reqQuery
     removeFields.forEach(field=> delete reqQuery[field])
 
-    //creating a query string
+    //creating a query string 
     let queryStr = JSON.stringify(reqQuery);
 
     //create operators like $gt,$gte,etc
     queryStr = queryStr.replace(/\b(gt|gte|le|lte|in)\b/g, match=>`$${match}`);
 
-    // finding resourse
-    let query = Bootcamp.find(JSON.parse(queryStr));
+    // Finding resourse
+    let query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
 
     //selecting fields
     if(req.query.select){
@@ -146,7 +144,7 @@ exports.updateBootcamp = asyncHandeler( async function(req,res,next){
 //@access  Private
 exports.deleteBootcamp = asyncHandeler(async function(req,res,next){
   
-        const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id)
+        const bootcamp = await Bootcamp.findById(req.params.id)
         if(!bootcamp){
             return next({
                 message:`cannot delete bootcamp, as Bootcamp not found with an ID of ${req.params.id}`,
@@ -155,6 +153,7 @@ exports.deleteBootcamp = asyncHandeler(async function(req,res,next){
             })
             
         }
+        bootcamp.remove();
         res.status(201).json({success:true,msg:`deleted bootcamp where ID is ${req.params.id}`,Data:bootcamp});
         next();
 })

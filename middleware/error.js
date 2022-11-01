@@ -1,13 +1,9 @@
 const ErrorResponse = require("../utils/errorResponse.js")
-
 function errorHandeler(err,req,res,next){
     let error = {...err};
-    // error.message = err.message;
-    // console.log(err)
-
     //mongoosse bad Object ID.
     if(err.name === "CastError"){
-        const message = `Bootcamp not found with an ID of ${err.value}`;
+        const message = error.message?error.message:`Bootcamp not found with an ID of ${err.value}`;
         error = new ErrorResponse(message,400)
     }
 
@@ -27,10 +23,9 @@ function errorHandeler(err,req,res,next){
         message = message.substring(0,message.length-1); 
         error = new ErrorResponse(message,400)        
     }
-    
     res.status(error.statusCode || 500).json({
         success: false,
-        err: error.message || "Server Error"
+        err: error.message || error.msg || "Server Error"
     })
 }
 module.exports = errorHandeler

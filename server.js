@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colours = require("colours")
 const bootcamps = require("./routes/bootcamps.js");
+const courses = require("./routes/courses.js");
 const connectDB = require("./config/db.js");
 const errorHandeler = require("./middleware/error.js");
 const deviceDetector  = require("node-device-detector");
@@ -38,8 +39,11 @@ if(process.env.NODE_ENV === "developement"){
    app.use(morgan("dev"));
 }
 
-// mount routers
+// mount bootcamp routers
 app.use("/api/v1/bootcamps",bootcamps);
+
+// mount courses routers
+app.use("/api/v1/courses",courses);
 
 // mounting error handeler middle ware
 app.use(errorHandeler);
