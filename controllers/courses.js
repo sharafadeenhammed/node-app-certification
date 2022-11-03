@@ -99,7 +99,7 @@ exports.deleteCourse = asyncHandeler(async function (req,res,next){
     const course = await Course.findById(req.params.id);
     if(!course){
         return next(new errorResponse(`No Course With The Id of ${req.params.id}`,404));
-    }
+    } 
     course.remove();
     res.status(201).json({
         success:true,
@@ -109,9 +109,18 @@ exports.deleteCourse = asyncHandeler(async function (req,res,next){
 });
 
 
-    /*
+
+
+
+
+
+
+
+
+// end of line...
+/*
     dad ridwan account detiails...
     "0119368764"
     gtbank
-    */
+*/
 
