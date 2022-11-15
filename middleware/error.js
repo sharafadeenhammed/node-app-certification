@@ -1,10 +1,11 @@
-const ErrorResponse = require("../utils/errorResponse.js")
+const ErrorResponse = require("../utils/errorResponse.js");
 function errorHandeler(err,req,res,next){
     let error = {...err};
     //mongoosse bad Object ID.
     if(err.name === "CastError"){
-        const message = error.message?error.message:`Bootcamp not found with an ID of ${err.value}`;
-        error = new ErrorResponse(message,400)
+        const message = error.message?error.message:`Invalid Search Attempted With an ID of ${err.value}`;
+        error = new ErrorResponse(message, 400);
+        
     }
 
     //mongoose duplicate key
@@ -13,7 +14,6 @@ function errorHandeler(err,req,res,next){
         error = new ErrorResponse(message,400)
     }
     
-    // console.log(err.name);
    
    if(err.name === "ValidationError"){
     let message = ""

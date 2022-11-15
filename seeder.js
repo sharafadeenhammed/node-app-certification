@@ -14,7 +14,7 @@ moongoose.connect(process.env.MONGO_LOCAL_URI);
 console.log("running seeder...");
 
 // import bootcamp data into DB
-const importData = async ()=>{
+const importBootcamps = async ()=>{
     try {
         await Bootcamp.create(bootcamps)
         console.log("Bootcamp Data Imported".green.inverse);
@@ -25,7 +25,7 @@ const importData = async ()=>{
 }
 
 //delete bootcamps data from DB
-const deleteData = async ()=>{
+const deleteBootcamps = async ()=>{
     try {
         await Bootcamp.deleteMany();
         console.log("Bootcamp Data Destroyed".red.inverse);
@@ -38,11 +38,12 @@ const deleteData = async ()=>{
 // import courses to DB
 const importCourses = async ()=>{
     try {
-        await Course.create(courses)
+        await Course.create(courses);
         console.log("Courses Imported".green.inverse);
         process.exit(1);
     } catch (error) {
         console.log(error);
+        process.exit(1);
     }
 }
 //delete Course from DB
@@ -57,10 +58,10 @@ const deleteCourses = async ()=>{
 }
 
 if(process.argv[2] === "-ib"){
-    importData();
+    importBootcamps();
 
 }else if(process.argv[2] === "-db"){
-    deleteData();
+    deleteBootcamps();
 }
 else if(process.argv[2] === "-ic"){
     importCourses();
@@ -68,7 +69,10 @@ else if(process.argv[2] === "-ic"){
 else if(process.argv[2] === "-dc"){
     deleteCourses();
 }
-
+else {
+    console.log("invalid command exiting...".yellow.inverse);
+    process.exit(-1);
+}
 // process.exit(0);
 
 

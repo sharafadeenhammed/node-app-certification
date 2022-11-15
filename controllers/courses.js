@@ -37,7 +37,7 @@ exports.getCourse = asyncHandeler(async function (req,res,next){
         select:"name description"
     }); 
     if(!course){
-        return next(new errorResponse(`No courses with the id of ${req.params.id}`,404));
+        return next(new errorResponse(`No course with the id of ${req.params.id}`,404));
     }
     res.status(200).json({
         success:true,
@@ -71,7 +71,7 @@ exports.addCourse = asyncHandeler(async function (req,res,next){
 });
 
 //@desc     Update a Course...
-//@route    UPDATE /api/v1/bootcamp/:bootcampId/courses
+//@route    UPDATE /api/v1/course/:id
 //@access   Private.
 exports.updateCourse = asyncHandeler(async function (req,res,next){
     let course = await Course.findById(req.params.id);
@@ -99,7 +99,7 @@ exports.deleteCourse = asyncHandeler(async function (req,res,next){
     const course = await Course.findById(req.params.id);
     if(!course){
         return next(new errorResponse(`No Course With The Id of ${req.params.id}`,404));
-    } 
+    }
     course.remove();
     res.status(201).json({
         success:true,

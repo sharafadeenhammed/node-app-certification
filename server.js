@@ -1,11 +1,13 @@
 const express = require("express");
+const path = require("path");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
-const colours = require("colours")
+const colours = require("colours");
 const bootcamps = require("./routes/bootcamps.js");
 const courses = require("./routes/courses.js");
 const connectDB = require("./config/db.js");
 const errorHandeler = require("./middleware/error.js");
+const fileUpload = require("express-fileupload");
 const deviceDetector  = require("node-device-detector");
 const detector = new deviceDetector({
    clientIndexes: true,
@@ -39,11 +41,17 @@ if(process.env.NODE_ENV === "developement"){
    app.use(morgan("dev"));
 }
 
+// using a static folder
+app.use(express.static(path.join(__dirname, "public")));
+
+// mounting fileupload miidleware
+app.use(fileUpload());
+
 // mount bootcamp routers
-app.use("/api/v1/bootcamps",bootcamps);
+app.use("/api/v1/bootcamps", bootcamps);
 
 // mount courses routers
-app.use("/api/v1/courses",courses);
+app.use("/api/v1/courses", courses);
 
 // mounting error handeler middle ware
 app.use(errorHandeler);

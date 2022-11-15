@@ -1,90 +1,27 @@
-const Bootcamp = require("../models/Bootcamp.js")
 const asyncHandeler = require("../middleware/async.js")
 const geocoder = require("../utils/geocoder.js");
+const errorResponse = require("../utils/errorResponse.js");
+const path = require("path");
+const Bootcamp = require("../models/Bootcamp");
 // 0810 097 2092
 //@desc     get all botcamps
 //@route    GET /api/v1/bootcamps
 //@access   Public
 exports.getBootcamps = asyncHandeler(async function(req,res,next){
-    // making a copy of req.query
-    const reqQuery = {...req.query};
-    //fields to exclude for filtering
-    const removeFields = ["select","sort","limit","page"];
-
-    //loop over removeFields and delete from reqQuery
-    removeFields.forEach(field=> delete reqQuery[field])
-
-    //creating a query string 
-    let queryStr = JSON.stringify(reqQuery);
-
-    //create operators like $gt,$gte,etc
-    queryStr = queryStr.replace(/\b(gt|gte|le|lte|in)\b/g, match=>`$${match}`);
-
-    // Finding resourse
-    let query = Bootcamp.find(JSON.parse(queryStr)).populate("courses");
-
-    //selecting fields
-    if(req.query.select){
-        const fields = req.query.select.split(",").join(" ");
-        query = query.select(fields);
-    }
-
-    //pagination
-    const page = parseInt(req.query.page,10) || 1;
-    const limit = parseInt(req.query.limit,10)||25;
-    const startIndex = (page-1)*limit
-    const endIndex = page*limit;
-    const total = await Bootcamp.countDocuments();
-    query =  query.skip(startIndex).limit(limit)
-    let pagination = {};
-
-    //sort result fields
-    if(req.query.sort){
-        const sortBy = req.query.sort.split(",").join(" ");
-        query = query.sort(sortBy);
-    }
-    // else{
-    // query = query.sort("-createdAt");
-    // }
-    
-
-    //executing query
-    const bootcamps = await query;
-    
-    // setting the fields on tghe pagination object;
-    if(endIndex < total){
-        pagination.next = {
-            page: page+1,
-            limit: limit
-        }
-    }
-    if(startIndex > 1){
-        pagination.prev = {
-            page : page-1,
-            limit: limit
-        }
-    }
-    if(bootcamps.length == 0){
-        pagination = {};
-    }
-
-    res.status(200).json({success:true,msg:"show all bootcamps",count:bootcamps.length,pagination,Data:bootcamps});
+    res.status(200).json(res.searchResult);
     next();
-})
+ })
 
     
 //@desc     get single botcamp
 //@route    GET /api/v1/bootcamps/:id
 //@access   Public
-exports.getBootcamp = asyncHandeler(async function(req,res,next){
-        const bootcamp = await Bootcamp.findById(req.params.id)
-        if(!bootcamp){
-           return next({
-                message:`Bootcamp not found with an ID of ${req.params.id}`,
-                name:"wrong ID",
-                statusCode:404
-            })
-        }
+exports.getBootcamp = asyncHandeler(async function (req, res, next) {
+    const bootcamp = await Bootcamp.findById(req.params.id).populate("courses");
+    if(!bootcamp){
+        return next( new errorResponse( `Bootcamp not found with an ID of ${req.params.id}`,404)
+        )
+    }
         res.status(200).json({success:true,msg:`showing bootcamp where ID is ${req.params.id}`,Data:bootcamp});
         next();
 })
@@ -129,11 +66,8 @@ exports.updateBootcamp = asyncHandeler( async function(req,res,next){
    
         const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body,{new:true,runValidators:true})
         if(!bootcamp){
-            return next({
-                message:`cannot update bootcamp, as Bootcamp not found with an ID of ${req.params.id}`,
-                name:"wrong ID",
-                statusCode:404
-            })
+            return next( new errorResponse( `Bootcamp not found with an ID of ${req.params.id}`,404))
+            
         }
         res.status(201).json({success:true,msg:`update bootcamp where ID is ${req.params.id}`,Data:bootcamp});
         next();
@@ -146,14 +80,56 @@ exports.deleteBootcamp = asyncHandeler(async function(req,res,next){
   
         const bootcamp = await Bootcamp.findById(req.params.id)
         if(!bootcamp){
-            return next({
-                message:`cannot delete bootcamp, as Bootcamp not found with an ID of ${req.params.id}`,
-                name:"wrong ID",
-                statusCode:404
-            })
-            
+            return next( new errorResponse( `Bootcamp not found with an ID of ${req.params.id}`,404))
         }
         bootcamp.remove();
         res.status(201).json({success:true,msg:`deleted bootcamp where ID is ${req.params.id}`,Data:bootcamp});
         next();
+})
+
+//@desc    upload photo for bootcamp
+//@route   PUT /api/v1/bootcamps/:id/photo
+//@access  Private
+exports.bootcampPhotoUpload = asyncHandeler(async function (req, res, next) {
+    const bootcamp = Bootcamp.findById(req.params.id);
+    file = req.files.undefined;
+    
+    //creating custom file name
+    file.name = `photo_${req.params.id}${path.extname(file.name)}`;
+
+    // check if the bootcamp exists
+    if (!bootcamp) {
+        return next( new errorResponse( `Bootcamp not found with an ID of ${req.params.id}`,404))
+    }
+    
+    // check if files is uploaded
+    if (!req.files) {
+        next( new errorResponse( "please upload a photo file",400))
+    }
+
+    // check file if it is a photo
+    if (!file.mimetype.startsWith("image")) {
+       return next( new errorResponse( "please upload a valid photo file",400))
+    }
+
+    // check if file is not more than 1mb
+    if (file.size>process.env.MAX_FILE_UPLOAD) {
+       return next( new errorResponse( `please upload a photo file of size less than ${process.env.MAX_FILE_UPLOAD}`,400))
+    }
+    
+    // saving the file to uploads
+    file.mv(path.join(__dirname,"..","public","uploads",file.name), async function(err){
+        if (err) {
+            console.log(err)
+            return next(new errorResponse("Error uplaoding photo", 500));
+        }
+        await Bootcamp.findByIdAndUpdate(req.params.id,{photo:file.name})
+        res.status(201).json({
+            status: true,
+            filename: file.name
+        })
+        // console.log("file name: ", file);
+    });
+   
+    
 })
