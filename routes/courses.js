@@ -7,8 +7,14 @@ const {
     updateCourse,
     deleteCourse,
 } = require("../controllers/courses");
+const advancedResults = require("../middleware/advancedResults");
+const Course = require("../models/Course");
+populate = {
+    path: "bootcamp",
+    select:"name description address"
+}
 
-router.route("/").get(getCourses).post(addCourse);
+router.route("/").get(advancedResults(Course,populate),getCourses).post(addCourse);
 router.route("/:id").get(getCourse).put(updateCourse).delete(deleteCourse);
 
 

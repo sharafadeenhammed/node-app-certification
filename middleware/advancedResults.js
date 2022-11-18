@@ -13,8 +13,8 @@ const advancedResult = (model, populate) => async (req, res, next) => {
     let queryStr = JSON.stringify(reqQuery);
 
     //create operators like $gt,$gte,etc
-    queryStr = queryStr.replace(/\b(gt|gte|le|lte|in|lt)\b/g, match => `$${match}`);
-    console.log( "query String: ",JSON.parse(queryStr));
+    queryStr = queryStr.replace(/\b(gt|gte|le|lte|in|lt|eq)\b/g, match => `$${match}`);
+    // console.log( "query String: ", typeof JSON.parse(queryStr).weeks.$lte);
 
     // Finding resourse
     let query = model.find(JSON.parse(queryStr));
@@ -44,6 +44,7 @@ const advancedResult = (model, populate) => async (req, res, next) => {
 
     //executing query
     const result = await query;
+
     // setting the fields on tghe pagination object;
     if (endIndex < total) {
         pagination.next = {
@@ -71,3 +72,4 @@ const advancedResult = (model, populate) => async (req, res, next) => {
 }
 
 module.exports = advancedResult;
+

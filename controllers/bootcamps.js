@@ -18,13 +18,13 @@ exports.getBootcamps = asyncHandeler(async function(req,res,next){
 //@access   Public
 exports.getBootcamp = asyncHandeler(async function (req, res, next) {
     const bootcamp = await Bootcamp.findById(req.params.id).populate("courses");
-    if(!bootcamp){
-        return next( new errorResponse( `Bootcamp not found with an ID of ${req.params.id}`,404)
+    if (!bootcamp) {
+        return next(new errorResponse(`Bootcamp not found with an ID of ${req.params.id}`, 404)
         )
     }
-        res.status(200).json({success:true,msg:`showing bootcamp where ID is ${req.params.id}`,Data:bootcamp});
-        next();
-})
+    res.status(200).json({ success: true, msg: `showing bootcamp where ID is ${req.params.id}`, Data: bootcamp });
+    next();
+});
 
 //@desc     get bootcamps within a radius
 //@route    GET/api/v1/bootcamps/radius/:zipcode/:distance

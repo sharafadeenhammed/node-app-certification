@@ -5,9 +5,11 @@ const morgan = require("morgan");
 const colours = require("colours");
 const bootcamps = require("./routes/bootcamps.js");
 const courses = require("./routes/courses.js");
+const auth = require("./routes/auth")
 const connectDB = require("./config/db.js");
 const errorHandeler = require("./middleware/error.js");
 const fileUpload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
 const deviceDetector  = require("node-device-detector");
 const detector = new deviceDetector({
    clientIndexes: true,
@@ -20,7 +22,10 @@ dotenv.config({path:"./config/config.env"});
 
 const app = express();
 app.use(express.json());
-app.use(express(express.urlencoded({extended:false})));
+app.use(express.urlencoded({ extended: false }));
+
+// mounting cookie parser...
+app.use(cookieParser());
 
 //connect to database
 connectDB();
@@ -47,11 +52,14 @@ app.use(express.static(path.join(__dirname, "public")));
 // mounting fileupload miidleware
 app.use(fileUpload());
 
-// mount bootcamp routers
+// mounting bootcamp routers
 app.use("/api/v1/bootcamps", bootcamps);
 
-// mount courses routers
+// mounting courses routers
 app.use("/api/v1/courses", courses);
+
+// mounting the auth router
+app.use("/api/v1/auth/",auth)
 
 // mounting error handeler middle ware
 app.use(errorHandeler);

@@ -7,23 +7,23 @@ const Bootcamp = require("../models/Bootcamp.js");
 //@route    GET /api/v1/courses/:bootcampId
 //@access   Public
 exports.getCourses = asyncHandeler(async function (req,res,next){
-    let query
-    if(req.params.bootcampId){
-        query = Course.find({bootcamp:req.params.bootcampId});
+  
+    if (req.params.bootcampId) {
+        const courses = await Course.find({ bootcamp: req.params.bootcampId });
+        if (courses.length === 0) {
+            return next(new errorResponse(`can't find Bootcamp with ID of ${req.params.bootcampId}`, 404));
+        }
+        res.status(200).json({
+            success: true,
+            msg: `showing courses where bootcamp ID is ${req.params.bootcampId}`,
+            count: courses.length,
+            data: courses
+        })
+     
     }
-    else{
-        query = Course.find().populate({
-            path:"bootcamp",
-            select:"name description"
-        });
+    else {
+        res.status(200).json(res.searchResult);
     }
-
-    const courses = await query;
-    res.status(200).json({
-        success:true,
-        count:courses.length,
-        data:courses
-    })
     next();
 })
 
