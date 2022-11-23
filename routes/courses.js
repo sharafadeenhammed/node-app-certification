@@ -7,6 +7,11 @@ const {
     updateCourse,
     deleteCourse,
 } = require("../controllers/courses");
+
+const {
+    protect
+} = require("../middleware/auth") 
+
 const advancedResults = require("../middleware/advancedResults");
 const Course = require("../models/Course");
 populate = {
@@ -14,8 +19,13 @@ populate = {
     select:"name description address"
 }
 
-router.route("/").get(advancedResults(Course,populate),getCourses).post(addCourse);
-router.route("/:id").get(getCourse).put(updateCourse).delete(deleteCourse);
+router.route("/")
+    .get(advancedResults(Course, populate), getCourses)
+    .post(protect, addCourse);
+router.route("/:id")
+    .get(getCourse)
+    .put(protect, updateCourse)
+    .delete(protect, deleteCourse);
 
 
 module.exports = router;

@@ -15,17 +15,29 @@ const advancedResults = require("../middleware/advancedResults.js");
 
 const Bootcamp = require("../models/Bootcamp.js");
 
+const {
+    protect,
+    authorise
+} = require("../middleware/auth") 
+
 // include other resourse router...
 const courseRouter = require("./courses.js");
 router.use("/:bootcampId/courses",courseRouter);
 
-router.route("/").get(advancedResults(Bootcamp,"courses"), getBootcamps).post(createBootcamp);
+router.route("/")
+    .get(advancedResults(Bootcamp, "courses"), getBootcamps)
+    .post(protect, authorise("admin","publisher"), createBootcamp);
 
-router.route("/:id").get(getBootcamp).put(updateBootcamp).delete(deleteBootcamp);
+router.route("/:id")
+    .get(getBootcamp)
+    .put(protect, authorise("admin","publisher"), updateBootcamp)
+    .delete(protect, authorise("admin","publisher"), deleteBootcamp);
 
-router.route("/radius/:zipcode/:distance").get(getBootcampsInRadius);
+router.route("/radius/:zipcode/:distance")
+    .get(getBootcampsInRadius);
 
-router.route("/:id/photo").put(bootcampPhotoUpload);
+router.route("/:id/photo")
+    .put(protect, authorise("admin","publisher"), bootcampPhotoUpload);
 
 /*
     // creating a get route on "/api/v1/bootcamps"
