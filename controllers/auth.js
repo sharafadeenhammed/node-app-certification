@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const asyncHandeler = require("../middleware/async.js")
 const errorResponse = require("../utils/errorResponse.js");
 const User = require("../models/User");
@@ -48,16 +49,17 @@ exports.loginUser = asyncHandeler(async function (req, res, next) {
 });
 
 //@desc     get logged in user
-//@route    POST /api/v1/auth/me
+//@route    GET /api/v1/auth/me
 //@access   Private
 exports.getMe = asyncHandeler(async function (req, res, next) {
-    if (!req.user) {
-        return next(new errorResponse("not authorised to access this route", 401));
-    }
+    // if (!req.user) {
+    //     return next(new errorResponse("not authorised to access this route", 401));
+    // }
     res.status(200).json({
         success: true,
         data: req.user
     });
+
     next()
 
 });
@@ -71,11 +73,9 @@ exports.forgotPassword = asyncHandeler(async function (req, res, next) {
     if (!user) {
         return next(new errorResponse(`There is no user with the email (${req.body.email})`, 404));
     }
-    delete user.password;
     const resetToken = user.getResetPasswordToken();
-    // console.log("reset token = ", resetToken);
     await user.save({ validateBeforeSave: true });
-    const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${resetToken}`
+    const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auth/resetpassword/${resetToken}`;
 
     const message = `You are receiving this email because you (or someone else) requested the reset of a password. Please make a put request to \n\n ${resetUrl}`;
     try {
@@ -94,12 +94,74 @@ exports.forgotPassword = asyncHandeler(async function (req, res, next) {
         user.resetPasswordExpire = undefined;
         user.resetPasswordToken = undefined;
         await user.save({ validateBeforeSave: false });
-        return next(new errorResponse("Email could not be sent",500))
-        
+        return next(new errorResponse("Email could not be sent", 500));
     }
     
     next();
 });
+
+//@desc     reset password
+//@route    POST /api/v1/auth/forgotpassword/:resetToken
+//@access   Public
+exports.resetPassword = asyncHandeler(async function (req, res, next) {
+    const token = req.params.resetToken;
+    resetPasswordToken = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({ resetPasswordToken, resetPasswordExpire: { $gt: Date.now() } });
+    if (!user) {
+        return next(new errorResponse("invalid token", 400));
+    }
+    user.password = req.body.password;
+    user.resetPasswordExpire = undefined;
+    user.resetPasswordToken = undefined;
+    await user.save();
+    sendTokenResponse(user, 200, res);
+
+});
+//@desc     Update user details
+//@route    PUT /api/v1/auth/updtedetails
+//@access   Private
+exports.updateDetails = asyncHandeler(async function (req, res, next) {
+    const fieldsToUpdate = {
+        name:req.body.name,
+        email:req.body.email,
+    }
+    const user = await User.findByIdAndUpdate(req.user._id, fieldsToUpdate, {
+        new: true,
+        runValidators:true
+    })
+    if (!user) {
+        return next(new errorResponse("failed to update",500 ));
+    }
+    res.status(200).json({
+        success: true,
+        msg: "update sucessful",
+        data:user
+    })
+    next();
+});
+
+//@desc     change password
+//@route    PUT /api/v1/auth/updatepassword
+//@access   Private
+exports.updatePassword = asyncHandeler(async function (req, res, next) {
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+        return next(new errorResponse("failed to change and update password as user cannot be found", 404));
+    }
+    if (!(await user.matchPassword(req.body.currentPassword))) {
+        return next(new errorResponse("password incorrrect", 401));
+    }
+
+    user.password = req.body.newPassword;
+    await user.save({
+        new: true,
+        validateBeforeSave: true
+    })
+    sendTokenResponse(user, 200, res);
+    next()
+});
+
+
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = function (user,statusCode,res) {
@@ -114,12 +176,12 @@ const sendTokenResponse = function (user,statusCode,res) {
     if (process.env.NODE_ENV == "production") {
         options.secure = true;
     }
-
     // sending response with the cookie and 
     res.status(statusCode)
         .cookie("token", token, options)
         .send({
             success: true,
-            token
+            token,
         });
+
 }

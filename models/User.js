@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
         default: Date.now
     },
     resetPasswordExpire: Date,
-    resetPasswordToken: String
+    resetPasswordToken: String,
 });
 
 // 
@@ -77,6 +77,5 @@ userSchema.methods.getResetPasswordToken = function () {
 
     return resetToken
 }
-
 
 module.exports = mongoose.model("User", userSchema);

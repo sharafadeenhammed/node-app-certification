@@ -8,14 +8,20 @@ const {
     registerUser,
     loginUser,
     getMe,
-    forgotPassword
+    forgotPassword,
+    resetPassword,
+    updateDetails,
+    updatePassword
  } = require("../controllers/auth");
 
 const router = Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/me", protect, getMe);
-router.post("/forgotpassword", forgotPassword);
+router.put("/updatedetails", protect, updateDetails);
+router.put("/updatepassword", protect, updatePassword);
+router.post("/forgotpassword/", forgotPassword);
+router.put("/resetpassword/:resetToken", resetPassword);
 
 
 

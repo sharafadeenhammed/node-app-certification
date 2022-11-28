@@ -6,6 +6,7 @@ const colours = require("colours");
 const bootcamps = require("./routes/bootcamps.js");
 const courses = require("./routes/courses.js");
 const auth = require("./routes/auth")
+const users = require("./routes/users");
 const connectDB = require("./config/db.js");
 const errorHandeler = require("./middleware/error.js");
 const fileUpload = require("express-fileupload");
@@ -59,7 +60,10 @@ app.use("/api/v1/bootcamps", bootcamps);
 app.use("/api/v1/courses", courses);
 
 // mounting the auth router
-app.use("/api/v1/auth/",auth)
+app.use("/api/v1/auth/", auth)
+
+// mounting the users router
+app.use("/api/v1/users", users);
 
 // mounting error handeler middle ware
 app.use(errorHandeler);

@@ -39,21 +39,4 @@ router.route("/radius/:zipcode/:distance")
 router.route("/:id/photo")
     .put(protect, authorise("admin","publisher"), bootcampPhotoUpload);
 
-/*
-    // creating a get route on "/api/v1/bootcamps"
-    router.get("/",getBootcamps);
-
-    //get a specific bootcamp
-    router.get("/:id",getBootcamp);
-
-    //creating a post route on "/api/v1/bootcamps"
-    router.post("/",createBootcamp);
-
-    //creating a put route on "/api/v1/bootcamps"
-    router.put("/:id",updateBootcamp);
-
-    //creating a delete route on "/api/v1/bootcamps"
-    router.delete("/:id",deleteBootcamp);
-*/
-
 module.exports=router;
