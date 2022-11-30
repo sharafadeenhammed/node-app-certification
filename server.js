@@ -5,18 +5,13 @@ const morgan = require("morgan");
 const colours = require("colours");
 const bootcamps = require("./routes/bootcamps.js");
 const courses = require("./routes/courses.js");
-const auth = require("./routes/auth")
+const auth = require("./routes/auth");
+const reviews = require("./routes/reviews");
 const users = require("./routes/users");
 const connectDB = require("./config/db.js");
 const errorHandeler = require("./middleware/error.js");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
-const deviceDetector  = require("node-device-detector");
-const detector = new deviceDetector({
-   clientIndexes: true,
-   deviceIndexes: true,
-   deviceAliasCode: false,
- });
 
 //load env vars
 dotenv.config({path:"./config/config.env"});
@@ -30,15 +25,6 @@ app.use(cookieParser());
 
 //connect to database
 connectDB();
-
-/*
-// using the  node device detector...
-//{status:"error",message:"cannot dereminethe type of device..."}
-//req.headers["user-agent"]
-app.get("/",(req,res)=>{
-   res.send(req.headers["user-agent"] ? detector.detect(req.headers["user-agent"]) : {status:"error",message:"cannot deremine the type of device..."});
-})
-*/
 
 
 
@@ -64,6 +50,9 @@ app.use("/api/v1/auth/", auth)
 
 // mounting the users router
 app.use("/api/v1/users", users);
+
+// mounting the reviews router
+app.use("/api/v1/reviews", reviews);
 
 // mounting error handeler middle ware
 app.use(errorHandeler);

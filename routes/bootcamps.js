@@ -20,9 +20,16 @@ const {
     authorise
 } = require("../middleware/auth") 
 
-// include other resourse router...
+// include other resourse router(courses)...
 const courseRouter = require("./courses.js");
-router.use("/:bootcampId/courses",courseRouter);
+router.use("/:bootcampId/courses", courseRouter);
+
+// include other resourse router(reviews)...
+const reviewRouter = require("./reviews.js");
+router.use("/:bootcampId/reviews",reviewRouter);
+
+
+
 
 router.route("/")
     .get(advancedResults(Bootcamp, "courses"), getBootcamps)

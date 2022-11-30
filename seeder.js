@@ -5,6 +5,7 @@ const moongoose = require("mongoose");
 const Bootcamp = require("./models/Bootcamp.js");
 const Course = require("./models/Course.js");
 const User = require("./models/User.js");
+const Review = require("./models/Review.js");
 const bcrypt = require("bcryptjs");
 
 dotenv.config({path:"./config/config.env"});
@@ -13,6 +14,8 @@ const bootcamps =  JSON.parse(fs.readFileSync("./_data/bootcamps.json","utf-8"))
 const courses = JSON.parse(fs.readFileSync("./_data/courses.json", "utf-8"));
 
 const users = JSON.parse(fs.readFileSync("./_data/users.json", "utf-8"));
+
+const reviews = JSON.parse(fs.readFileSync("./_data/reviews.json", "utf-8"));
 moongoose.connect(process.env.MONGO_LOCAL_URI);
 
 console.log("running seeder...");
@@ -65,19 +68,6 @@ const deleteCourses = async ()=>{
 // import users data into DB
 const importUsers = async ()=>{
     try {
-        // users.forEach((user) => {
-        //     async function createUser(user) {
-        //         // console.log("creating user...\n")
-        //         const salt = bcrypt.genSaltSync(10);
-        //         const hashed = bcrypt.hashSync(user.password, salt);
-        //         // user.password = hashed;
-        //         // user.createdAt = Date.now();
-        //         const dbUser = await User.create(user);
-        //         console.log("created user:\n",dbUser);
-        //     }
-        //     createUser(user);
-        // });
-
         newd = await User.create(users);
         console.log(newd);
         
@@ -100,6 +90,27 @@ const deleteUsers = async ()=>{
     }
 }
 
+// import reviews data into DB
+const importReviews = async ()=>{
+    try {
+        await Review.create(reviews);        
+        console.log("  Reviews Data Imported  ".green.inverse);
+        process.exit(1)
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+//delete users data from DB
+const deleteReviews = async ()=>{
+    try {
+        await Review.deleteMany();
+        console.log(" Reviews Data Destroyed".red.inverse);
+        process.exit(1);
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 if(process.argv[2] === "-ib"){
     importBootcamps();
@@ -118,6 +129,12 @@ else if (process.argv[2] === "-iu") {
 }
 else if (process.argv[2] === "-du") {
     deleteUsers();
+}
+else if (process.argv[2] === "-ir") {
+   importReviews();
+}
+else if (process.argv[2] === "-dr") {
+   deleteReviews();
 }
 else {
     console.log("invalid command exiting...".yellow.inverse);
