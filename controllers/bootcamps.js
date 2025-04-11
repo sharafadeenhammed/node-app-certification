@@ -3,7 +3,7 @@ const geocoder = require("../utils/geocoder.js");
 const errorResponse = require("../utils/errorResponse.js");
 const path = require("path");
 const Bootcamp = require("../models/Bootcamp");
-// 0810 097 2092
+
 //@desc     get all botcamps
 //@route    GET /api/v1/bootcamps
 //@access   Public
@@ -41,7 +41,7 @@ exports.getBootcampsInRadius = asyncHandeler(async(req,res,next)=>{
     const bootcamps =  await Bootcamp.find({"location.coordinates":{$geoWithin:{$centerSphere:[[long , lati], radius]}
      }});
     res.status(200).json({
-        status:true,
+        success:true,
         count:bootcamps.length,
         data:bootcamps
     });

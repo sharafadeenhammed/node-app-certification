@@ -134,12 +134,3 @@ exports.deleteCourse = asyncHandeler(async function (req,res,next){
 
 
 
-
-
-// end of line...
-/*
-    dad ridwan account detiails...
-    "0119368764"
-    gtbank
-*/
-

@@ -74,4 +74,3 @@ exports.deleteUser = asyncHandeler(async function (req, res, next) {
     next();
 })
 
-// wekjrhfkasefjamM

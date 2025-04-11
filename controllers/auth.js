@@ -161,6 +161,24 @@ exports.updatePassword = asyncHandeler(async function (req, res, next) {
     next()
 });
 
+//@desc     log user out /clear cookie
+//@route    GET /api/v1/auth/logout
+//@access   Private
+exports.logout = asyncHandeler(async function (req, res, next) {
+    
+    res.status(200).cookie("token", "none", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production" ? true : false,
+        expire: Date(Date.now() + 10 * 1000)
+    }).json({
+        success: true,
+        msg:`${req.user.name} logged out succesfully`
+    });
+
+    next()
+
+});
+
 
 
 // Get token from model, create cookie and send response
@@ -169,7 +187,7 @@ const sendTokenResponse = function (user,statusCode,res) {
 
     // creating cookie options
     const options = {
-        expires: new Date(Date.now() + process.env.COOKIE_EXPIRY_DURATION * 24 * 60 * 60 * 1000),
+        expire: new Date(Date.now() + process.env.COOKIE_EXPIRY_DURATION * 24 * 60 * 60 * 1000),
         httpOnly:true,
     }
     // checking if the enviroment is in production and setting the secure option to true...

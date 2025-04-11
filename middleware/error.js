@@ -3,7 +3,7 @@ function errorHandeler(err,req,res,next){
     let error = { ...err };
     //mongoosse bad Object ID.
     if(err.name === "CastError"){
-        const message = error.message?error.message:`Invalid Search Attempted With an ID of ${err.value}`;
+        const message = error.message?error.message:"Resourse not found";
         error = new ErrorResponse(message, 400);
         
     }
@@ -11,7 +11,7 @@ function errorHandeler(err,req,res,next){
     //mongoose duplicate key
     if (err.code === 11000) {
         console.log(err);
-        const message = `Duplicate field value entered`;
+        const message = `Duplicate field value entered`; 
         error = new ErrorResponse(message,400)
     }
     

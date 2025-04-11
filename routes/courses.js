@@ -18,7 +18,7 @@ populate = {
     path: "bootcamp",
     select:"name description address"
 }
-
+ 
 router.route("/")
     .get(advancedResults(Course, populate), getCourses)
     .post(protect, addCourse);

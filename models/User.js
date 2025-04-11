@@ -17,7 +17,6 @@ const userSchema = new mongoose.Schema({
         match: [
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "please enter a valid email"],
         required: [true, "please add a email"],
-        
     },
     role: {
         type: String,
@@ -49,7 +48,7 @@ userSchema.pre("save", async function (req, res, next) {
     next(); 
 });
 
-// signed jwt and return
+// signed jwt and return 
 userSchema.methods.getSignedJwtToken = function () {
      return jwt.sign({
         id: this._id

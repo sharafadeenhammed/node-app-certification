@@ -3,7 +3,9 @@ const router = Router({mergeParams:true});
 const {
     getReviews,
     getReview,
-    createReview
+    createReview,
+    updateReview,
+    deleteReview
 } = require("../controllers/reviews");
 
 const {
@@ -18,9 +20,14 @@ const populate = {
     select:"name description"
 }
 
-router.route("/").get(advancedResults(Review, populate), getReviews).post(protect,authorise("admin","User"),createReview);
+router.route("/")
+    .get(advancedResults(Review, populate), getReviews)
+    .post(protect, authorise("admin", "User"), createReview);
 
-router.route("/:id").get(getReview);
+router.route("/:id")
+    .get(getReview)
+    .put(protect,authorise("User","admin"),updateReview)
+    .delete(protect,authorise("User","admin"),deleteReview);
 
 
 module.exports = router;

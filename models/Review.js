@@ -37,7 +37,6 @@ ReviewSchema.index({ bootcamp: 1, user: 1 }, { unique: true });
 
 //creating static function to calculate avgerage rating
 ReviewSchema.statics.getAverageRating = async function (bootcampId) {
-    // console.log("running avg...");
     let obj = await this.aggregate([
         {
            $match:{bootcamp:bootcampId}
@@ -67,3 +66,4 @@ ReviewSchema.pre("remove", async function(){
 })
 
 module.exports = mongoose.model("Review", ReviewSchema);
+

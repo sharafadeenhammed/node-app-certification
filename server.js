@@ -12,9 +12,18 @@ const connectDB = require("./config/db.js");
 const errorHandeler = require("./middleware/error.js");
 const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
+const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
+const xssClean = require("xss-clean");
+const hpp = require("hpp");
+const rateLimit = require("express-rate-limit");
+const cors = require("cors");
 
 //load env vars
-dotenv.config({path:"./config/config.env"});
+dotenv.config({ path: "./config/config.env" });
+
+//connect to database
+connectDB();
 
 const app = express();
 app.use(express.json());
@@ -23,8 +32,28 @@ app.use(express.urlencoded({ extended: false }));
 // mounting cookie parser...
 app.use(cookieParser());
 
-//connect to database
-connectDB();
+// Sanitize data
+app.use(mongoSanitize());
+
+// Set security headers
+app.use(helmet());
+
+// Prevent XSS attack
+app.use(xssClean());
+
+// Request rate limiting
+const limiter = rateLimit({
+   windowMs: 10 * 60 * 1000, // 10 mins
+   max: 100,   
+});
+app.use(limiter);
+
+// prevert http parmas polution
+app.use(hpp());
+
+// enable cors
+app.use(cors())
+
 
 
 
@@ -52,7 +81,12 @@ app.use("/api/v1/auth/", auth)
 app.use("/api/v1/users", users);
 
 // mounting the reviews router
-app.use("/api/v1/reviews", reviews);
+app.use("/api/v1/reviews",rateLimit({
+   windowMs: 10 * 60 * 1000, // 10 mins
+   max: 5,
+   message:"too many request on review route try again in next few minites"
+   
+}), reviews);
 
 // mounting error handeler middle ware
 app.use(errorHandeler);
@@ -65,5 +99,3 @@ const server = app.listen(port, ()=>{
 process.on("unhandledRejection",(err,promise)=>{
    console.log(`unhandeled rejections ${err.message}`.trimEnd.bolder);
    server.close(()=>{process.exit(1)});
-})
-
